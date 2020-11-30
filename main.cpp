@@ -25,7 +25,7 @@
 #include "allocator.hpp"
 
 int main() {
-	Queue<Triangle<int>, Allocator<Triangle<int>,256>> queue;
+	Queue<Triangle<int>, Allocator<Triangle<int>,8>> queue;
 
 	std::cout << "a TRIANGLE - Push" << std::endl
 			<< "d - Pop" << std::endl

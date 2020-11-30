@@ -45,7 +45,7 @@ public:
 	};
 
 	pointer allocate(size_type n) {
-		if (last == free_blocks.size()) {
+		if (last + n >= free_blocks.size()) {
 			throw std::bad_alloc();
 		}
 		pointer ptr = free_blocks[last];
