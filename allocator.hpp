@@ -59,13 +59,4 @@ public:
 	void deallocate(pointer, size_type) {
 		std::cout << "Deallocating\n";
 	}
-
-	template<typename U, typename ...Args>
-	void construct(U *p, Args &&...args) {
-		new (p) U(std::forward<Args>(args)...);
-	}
-
-	void destroy(pointer p) {
-		p->~T();
-	}
 };

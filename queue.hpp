@@ -17,13 +17,14 @@ private:
 			return allocator;
 		}
 
-		void* operator new(size_t) {
-			return get_allocator().allocate(1);
-		}
+		struct deleter_type {
+			deleter_type() = default;
+			void operator() (Node* ptr) {
+				get_allocator().deallocate(ptr, 1);
+			}
+		};
 
-		void operator delete(void *ptr) {
-			get_allocator().deallocate((Node *)ptr, 1);
-		}
+		static deleter_type deleter;
 
 		T data;
 		std::shared_ptr<Node> next;
@@ -82,7 +83,9 @@ public:
 };
 
 template <class T, class ALLOCATOR>
-Queue<T, ALLOCATOR>::Queue() : tail(new Node) {
+Queue<T, ALLOCATOR>::Queue() {
+	Node* ptr = Node::get_allocator().allocate(1);
+	tail = std::shared_ptr<Node>(new (ptr) Node, Node::deleter);
 	head = tail;
 }
 
@@ -108,7 +111,8 @@ void Queue<T, ALLOCATOR>::pop() {
 
 template <class T, class ALLOCATOR>
 void Queue<T, ALLOCATOR>::push(const T &value) {
-	std::shared_ptr<Node> node(new Node(value));
+	Node* ptr = Node::get_allocator().allocate(1);
+	std::shared_ptr<Node> node(new (ptr) Node(value), Node::deleter);
 	node->next = head;
 	head->prev = node;
 	head = node;
@@ -132,7 +136,8 @@ void Queue<T, ALLOCATOR>::insert(typename Queue<T, ALLOCATOR>::Forward_iterator&
 	if (iter == begin()) {
 		push(value);
 	} else {  
-		std::shared_ptr<Node> node(new Node(value));
+		Node* ptr = Node::get_allocator().allocate(1);
+		std::shared_ptr<Node> node(new (ptr) Node(value), Node::deleter);
 		node->next = iter.ptr;
 		node->prev = iter.ptr->prev;
 		iter.ptr->prev.lock()->next = node;
